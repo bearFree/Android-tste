@@ -26,7 +26,9 @@ public class FDPlayerActivity extends BaseActivity implements View.OnClickListen
         configure(savedInstanceState);
 
         awakeFromXml();
+
     }
+
 
     private void awakeFromXml() {
 

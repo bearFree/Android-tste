@@ -41,10 +41,13 @@ public class Teacher {
     // IO 返回dataSource
     public static List<Teacher> getAllTeachers() {
         List<Teacher> teachers = new ArrayList<>();
-        teachers.add(new Teacher(R.mipmap.mode,"老王","要想生活很开心，头上必须顶点绿"));
-        teachers.add(new Teacher(R.mipmap.phon,"隔壁","老王隔壁的隔壁"));
-        teachers.add(new Teacher(R.mipmap.ldc,"翠花","街坊邻居称之豆腐西施"));
-        teachers.add(new Teacher(R.mipmap.preview,"功夫","wo shi 路人甲乙丙丁"));
+        teachers.add(new Teacher(R.mipmap.mode," 老王","要想生活很开心，头上必须顶点绿"));
+        teachers.add(new Teacher(R.mipmap.phon," 隔壁","调起电话，6.0之后动态获取权限"));
+        teachers.add(new Teacher(R.mipmap.ldc," 翠花","内容提供器---ContentResolver"));
+        teachers.add(new Teacher(R.mipmap.preview," 通知","Nofification"));
+        teachers.add(new Teacher(R.mipmap.preview," 网络","GET POST XML解析"));
+        teachers.add(new Teacher(R.mipmap.preview," 等待","视频 音频播放"));
+        teachers.add(new Teacher(R.mipmap.preview," 第三个","Nofification"));
 
         return teachers;
     }

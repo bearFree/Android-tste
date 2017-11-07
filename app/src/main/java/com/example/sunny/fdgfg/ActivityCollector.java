@@ -22,7 +22,7 @@ public class ActivityCollector {
         activities.remove(activity);
     }
 
-    public static void finsinAPP() {
+    public static void finishAPP() {
         for (Activity activity: activities) {
             if (!activity.isFinishing()) {
                 activity.finish();

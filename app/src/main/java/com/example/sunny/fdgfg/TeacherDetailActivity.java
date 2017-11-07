@@ -1,5 +1,6 @@
 package com.example.sunny.fdgfg;
 
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -85,10 +87,11 @@ public class TeacherDetailActivity extends BaseActivity implements View.OnClickL
         myAsyncTask asyncTask = new myAsyncTask(title,progressBar);
         asyncTask.execute(1000);
 
+        // 对跳转改界面的通知进行取消， manager.cancel(1)  1为创建的通知id
+        NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        manager.cancel(1);
 
     }
-
-
 
     @Override
     protected void onDestroy() {
@@ -117,8 +120,11 @@ public class TeacherDetailActivity extends BaseActivity implements View.OnClickL
                 isTextView.setText("button delegate change textView");
                 if (progressBar.getVisibility() == View.VISIBLE)
                     progressBar.setVisibility(View.INVISIBLE);
-                else
+                else {
+                    Intent intent = new Intent("com.example.sunny.fdgfg.MY_BROADCAST_FINISH");
+                    sendBroadcast(intent);
                     progressBar.setVisibility(View.VISIBLE);
+                }
                 break;
             default:
                 break;
