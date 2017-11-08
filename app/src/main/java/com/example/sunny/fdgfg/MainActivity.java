@@ -1,75 +1,56 @@
 package com.example.sunny.fdgfg;
 
 import android.Manifest;
-import android.app.Activity;
-import android.app.Dialog;
-import android.app.DownloadManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.IntentSender;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.BitmapFactory;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
-import android.preference.PreferenceActivity;
+import android.os.IBinder;
+import android.os.Message;
 import android.provider.ContactsContract;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.sunny.Model.ProjectModel;
+import com.example.sunny.Model.Teacher;
+import com.example.sunny.Tool.HttpUtil;
+import com.example.sunny.Tool.SaxHelper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 
 
-import javax.xml.transform.sax.TemplatesHandler;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.FormBody;
-import okhttp3.Headers;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.Callback;
-import okhttp3.ResponseBody;
-import okio.BufferedSink;
 
 // 主入口函数
 public class MainActivity extends BaseActivity {
@@ -79,6 +60,51 @@ public class MainActivity extends BaseActivity {
     private LocalBroadcastManager localBroadcastManager;
 
     private static final String TAG = "MainActivity";
+
+    private MyService.DownloadBinder downloadBinder;
+    private ServiceConnection connection = new ServiceConnection() {
+
+        // service 绑定 activity 时调用
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            downloadBinder = (MyService.DownloadBinder)iBinder;
+            downloadBinder.startDownload();
+            downloadBinder.getProgress();
+        }
+
+        // service 解绑 activity 时调用
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+
+        }
+    };
+
+
+    /* 异步消息处理机制 Massager Handler MassageQueue Looper    runOnUiThread()就是消息异步处理机制的接口封装
+    * 1.异步线程内 Massager 封装数据,用于线程间传递消息, 通过Handler.send(msg)
+    * 2.Handler 处理者，用于收，发消息。handlerMessage()，sendMessage()
+    * 3.HandlerQueue 线程内的消息队列，存储Handler发送的消息
+    * 4.Looper 线程内的循环消息处理者，从Queue内取出msg
+    *
+    *
+    *  Message message = new Message();
+    *  message.what = 14552;
+    *  handler.sendMessage(messsage);
+    * */
+    public static final int UPDATA_TEXT = 1;
+    private android.os.Handler handler = new android.os.Handler(){
+        public void handleMessage(Message msg) {
+            switch (msg.what){
+                case UPDATA_TEXT:
+                    break;
+
+                default:
+                    break;
+            }
+
+        }
+    };
+
     /* Activity 生命周期
     * 1.onCreate === viewDidLoad
     * 2.onStart  === viewWillAppear
@@ -239,127 +265,39 @@ public class MainActivity extends BaseActivity {
 
                 } else if (i==4){  // 网络
 
-                    /* 原生 HttpURLConnection */
-                    /*
-                    new  Thread() {
+                    okhttp3.Callback callback = new okhttp3.Callback(){
                         @Override
-                        public void run() {
+                        public void onFailure(Call call, IOException e) {
+                            Log.i(TAG, "onFailure: request error");
+                        }
 
-                            String path = "http://121.40.84.157/download_Plist.php";
-                            HttpURLConnection connection = null;
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
 
-                            try {
-                                URL url = new URL(path);
-                                connection = (HttpURLConnection) url.openConnection();
-                                connection.setRequestMethod("GET");
-                                connection.setConnectTimeout(5*1000);       // l连接超时
-                                connection.setReadTimeout(5*1000);        // 读取超时
+                            Log.i(TAG, "onFailure: request data: " + response.body().string());
 
-                                if (connection.getResponseCode() == 200)
-                                {
-                                    // 获得服务器返回的输入流
-                                    InputStream stream = connection.getInputStream();
-                                    BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-                                    StringBuilder response = new StringBuilder();
-                                    String line;
-                                    while ((line = reader.readLine()) != null){
-                                        response.append(line);
-                                    }
-                                    showResponse(response.toString());
-                                }
 
-                            } catch (Exception e){e.printStackTrace();}
-                            finally {
-                                if (connection != null)
-                                    connection.disconnect(); // 关闭连接
-                            }
-                 )};
-                        */
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                         /* OkHttp3 */
-                         /*
-                         * 1.创建 OkHttpClient client 实例
-                         * 2.创建 Request request 实例
-                         * 3.client.newcall(request) 的 execute() 方法 发送请求并获取 response（返回数据）
-                         *
-                         * POST 和 GET 的 区别
-                         * POST request请求需要添加 提交数据 RequestBody body
-                         * */
-                        OkHttpClient client = new OkHttpClient();
-                        String url = "http://121.40.84.157/download_Plist.php";
-
-//                        try {
-
-                            // post
-//                            RequestBody body = new FormBody.Builder()
-//                                    .add("username", "admin")
-//                                    .add("password", "1234567")
-//                                    .build();
+//                            Gson gson = new Gson();
+//                            List<ProjectModel> projects = gson.fromJson(response.body().string(), new TypeToken<List<ProjectModel>>(){}.getType());
 //
-//                            Request request1 = new Request.Builder()
-//                                    .url(url)
-//                                    .post(body)
-//                                    .build();
-
-//                            Response response1 = client.newCall(request1).execute();
-//                            if (response1.isSuccessful()) {
-//                                String string = response1.body().string();
+//                            for (ProjectModel model : projects)
+//                            {
+//                                Log.i(TAG, "onItemClick: " + model.getName() + "project-id" + model.getProject_id());     // 返回值
 //                            }
+                        }
+                    };
+                    HttpUtil.sendHttpRequest("http://121.40.84.157/download_Plist.php",callback);
 
-                            Request request = new Request.Builder()
-                                    .url(url)
-                                    .build();
-
-                            // 同步
-//                            Response response = client.newCall(request).execute();
-//                            if (!response.isSuccessful()) throw new IOException("Unexpected code" + response);
-//
-//                            Headers responseHeaders = response.headers();
-//                            for (int i = 0; i < responseHeaders.size(); i++) {
-//                                Log.i(TAG, responseHeaders.name(i) + ": " + responseHeaders.value(i));
-//                            }
-//                        } catch (Exception e) {e.printStackTrace();}
-//                        finally {
-//
-//                        }
-
-                        // 异步
-                        client.newCall(request).enqueue(new Callback(){
-
-                            // 响应回调
-                            @Override
-                            public void onResponse(Call call, Response response) throws IOException {
-
-                                Gson gson = new Gson();
-                                List<ProjectModel> projects = gson.fromJson(response.body().string(), new TypeToken<List<ProjectModel>>(){}.getType());
-
-                                for (ProjectModel model : projects)
-                                {
-                                    Log.i(TAG, "onItemClick: " + model.getName() + "project-id" + model.getProject_id());     // 返回值
-                                }
-
-                            }
-
-                            // 错误处理
-                            @Override
-                            public void onFailure(Call call, IOException e) {
-                                e.printStackTrace();
-                            }
-
-                        });
-
-
-                    }
-                }).start();
-
-
-                }else if (i==5){  // 视频播放 音频 VideoView MediaPlayer
-                    Uri videoPath = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.dfsd);
+                }else if (i==5){
+                    Intent startIntent = new Intent(MainActivity.this, MyService.class);
+                    bindService(startIntent,connection, BIND_AUTO_CREATE);
+//                    startService(startIntent);
 
                 }else if (i==6){  // http
 
+                    Intent stopIntent = new Intent(MainActivity.this,MyService.class);
+                    unbindService(connection);
+//                    stopService(stopIntent);
 
 
 
@@ -417,6 +355,8 @@ public class MainActivity extends BaseActivity {
 //        sendBroadcast(new Intent(cationName));
 
     }
+
+
 
     /*在UI线程 操作请求返回值*/
     private void showResponse(final String response) {

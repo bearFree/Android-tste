@@ -2,8 +2,6 @@ package com.example.sunny.fdgfg;
 
 import java.util.List;
 
-import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.content.Context;
@@ -11,7 +9,8 @@ import android.widget.ArrayAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
-import android.content.Intent;
+
+import com.example.sunny.Model.Teacher;
 
 /**
  * Created by sunny on 2017/6/20.

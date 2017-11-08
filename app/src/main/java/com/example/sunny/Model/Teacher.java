@@ -1,19 +1,13 @@
-package com.example.sunny.fdgfg;
+package com.example.sunny.Model;
 
 /**
  * Created by sunny on 2017/6/19.
  */
 
-import android.support.annotation.NonNull;
-
-import android.widget.ArrayAdapter;
+import com.example.sunny.fdgfg.R;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
-
 
 
 public class Teacher {
@@ -46,7 +40,7 @@ public class Teacher {
         teachers.add(new Teacher(R.mipmap.ldc," 翠花","内容提供器---ContentResolver"));
         teachers.add(new Teacher(R.mipmap.preview," 通知","Nofification"));
         teachers.add(new Teacher(R.mipmap.preview," 网络","GET POST XML解析"));
-        teachers.add(new Teacher(R.mipmap.preview," 等待","视频 音频播放"));
+        teachers.add(new Teacher(R.mipmap.preview," 服务","Service"));
         teachers.add(new Teacher(R.mipmap.preview," 第三个","Nofification"));
 
         return teachers;
